@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" sizes="192x192" href="operators.jpg">
+    <title>Undesigned Calculator</title>
+    <h1 style="color: darkblue;text-align: center;font-size: x-large">UNDESIGNED CALCULATOR</h1>
+</head>
+<style>
+    h2 {
+        text-align: center;
+    }
+
+    h3 {
+        text-align: center;
+    }
+
+    div {
+        width: 120px;
+        padding: 50px;
+        border: 5px solid blue;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: x-large;
+        position: relative;
+    }
+
+    body {
+        background-color: bisque;
+    }
+</style>
+
+<body>
+    <br>
+    <div style="height: 0px;font-size: xx-large;" id="show" class="boxed"></div>
+    <div style="height: 250px;" id="total" class="boxed">
+
+        <div id="num1" onclick="inputNum('num1')"
+            style="width: 20px;border: 5px solid orange;cursor: pointer;padding: 10px;font-weight: bold;margin-left: -50px;margin-top: -48px;"
+            class="boxed">2</div>
+        <div id="num2" onclick="inputNum('num2')"
+            style="width: 20px;border: 5px solid orange;cursor: pointer;padding: 10px;font-weight: bold;margin-left: 100px;margin-top: -30px;"
+            class="boxed">3</div><br>
+        <div id="pLus" onclick="operatorCase('pLus')"
+            style="width: 20px;border: 5px solid orange;cursor: pointer;padding: 10px;font-weight: bold;margin-left: 30px;margin-top: -30px;"
+            class="boxed">+</div>
+        <div id="minus" onclick="operatorCase('minus')"
+            style="width: 20px;border: 5px solid orange;cursor: pointer;padding: 10px;font-weight: bold;margin-left: 90px;"
+            class="boxed">-</div>
+        <div id="multiply" onclick="operatorCase('multiply')"
+            style="width: 20px;border: 5px solid orange;cursor: pointer;padding: 10px;font-weight: bold;margin-left: -50px;margin-top: -60px;"
+            class="boxed">*</div>
+        <div id="divide" onclick="operatorCase('divide')"
+            style="width: 20px;border: 5px solid orange;cursor: pointer;padding: 10px;font-weight: bold;margin-left: 5px;"
+            class="boxed">/</div>
+        <div id="num3" onclick="inputNum('num3')"
+            style="width: 20px;border: 5px solid orange;cursor: pointer;padding: 10px;font-weight: bold;margin-left: 80px;"
+            class="boxed">7</div>
+        <div id="reset" onclick="resetCalculation()"
+            style="width: 20px;border: 5px solid orange;cursor: pointer;padding: 10px;font-weight: bold;margin-left: -40px;margin-top: -32px;"
+            class="boxed">C</div>
+    </div>
+    <output style="font-weight: bold;position: absolute;top: 45%;left: 50%;margin: -120px 0 0 117px;">Numbers <br>&nbsp;
+        to be <br>produced:</output><br>
+    <output id="theNum"
+        style="font-weight: bold;position: absolute;top: 46%;left: 50%;margin: -70px 0 0 117px;"></output>
+    <output id="check"
+        style="font-weight: bold;font-size: large;position: absolute;top: 50%;left: 50%;margin: 20px 0 0 117px;"></output>
+    <button id="reset" onclick="reset()"
+        style="background-color:darkblue;color: white;margin-left: 67%;margin-right: -50%;position: relative;">Reset</button>
+    <output id="scoreBoard"
+        style="font-weight: bold;font-size: large;position: absolute;margin-left: -27%;margin-right: -50%;position: relative;"></output>
+
+
+    <script>
+        var allOperators = ['+', '-', '/', '*'];
+        var numbers = [];
+        var foundS = [];
+        var score = 100;
+
+        function setNumbers() {
+            score = 100;
+            document.getElementById("scoreBoard").innerText = "Score: " + String(score);
+            numbers.length = 0;
+            for (let k = 0; k < 6; k++) {
+                let myRandom = parseInt(((Math.random() * 90) + 9).toFixed(0))
+                if(!numbers.includes(myRandom)){
+                    numbers.push(myRandom);
+                }else{
+                    numbers.push(myRandom+3);
+                }
+            }
+            numbers = numbers.sort();
+            if (numbers[0] > 20) {
+                let num = numbers[0];
+                numbers[0] = parseInt(num - 8);
+            }
+            for (let i of numbers) {
+                document.getElementById("theNum").innerText += i + "\n";
+            }
+        }
+        function reset() {
+            reSetNumbers();
+            resetCalculation();
+            document.getElementById("theNum").innerText = "";
+            document.getElementById("check").innerText = "";
+            setNumbers();
+            foundS.length = 0;
+        }
+        function reSetNumbers() {
+            resetCalculation();
+            let showIt = document.getElementById("theNum");
+            let showFound = document.getElementById("check");
+            showIt.innerText = "";
+            showFound.innerText = "";
+            for (let i of numbers) {
+                if (foundS.length == numbers.length) {
+                    document.getElementById("show").style = "margin-top:-20px;";
+                    document.getElementById("show").innerText = "\xa0\xa0 Congrats \xa0\xa0You Found \xa0\xa0\xa0Them All!"+"\n";
+                    document.getElementById("show").innerText += "\xa0Your Score: " + score;
+                }
+                else if (foundS.includes(i)) {
+                    document.getElementById("show").innerText = "";
+                    showFound.style.textDecorationLine = "line-through";
+                    showFound.innerText += i + "\n"
+                } else {
+                    //  document.getElementById("theNum").style.textDecorationLine = "none";
+                    showIt.innerText += i + "\n";
+                }
+            }
+        }
+        const theCalculation = {
+            shownValue: '0',
+            firstOperand: null,
+            waitedOperand: false,
+            theOperator: null,
+        };
+
+        var isOpCalled = false;
+        function inputNum(div_Id) {
+            const { shownValue, waitedOperand } = theCalculation;
+            let showIt = document.getElementById("show");
+            let num = document.getElementById(div_Id)
+            if (num != null && !isNaN(parseInt(num.innerText))) {
+                if (waitedOperand == true) {
+                    theCalculation.shownValue = num.innerText
+                    document.getElementById("show").innerText += num.innerText
+                    theCalculation.waitedOperand = false;
+                } if (theCalculation.firstOperand != null && theCalculation.theOperator != null && theCalculation.shownValue != '0') {
+                    const theInput = parseInt(theCalculation.shownValue);
+                    const result = calculateResult(theCalculation.firstOperand, theInput, theCalculation.theOperator);
+                    showIt.innerText = result;
+                    if (numbers.includes(result) && !foundS.includes(result)) {
+                        foundS.push(result);
+                        reSetNumbers();
+                    }
+                }
+                else {
+                    theCalculation.shownValue = num.innerText;
+                    showIt.innerText = theCalculation.shownValue;
+                }
+            }
+        }
+        var foundIndex;
+        function operatorCase(div_Id) {
+            const { firstOperand, shownValue, theOperator } = theCalculation
+            let theComponent = document.getElementById(div_Id)
+            let showIt = document.getElementById("show")
+            const theInput = parseInt(shownValue)
+            if (!allOperators.includes(showIt.innerText[showIt.innerText.length - 1])) {
+                if (isNaN(theComponent.innerText)) {
+                    theCalculation.theOperator = theComponent.innerText
+                }
+                if (firstOperand == null && !isNaN(theInput)) {
+                    theCalculation.firstOperand = theInput
+                    showIt.innerText += String(theCalculation.theOperator)
+                    isOpCalled = true;
+                } else if (theOperator) {
+                    score -= 2;
+                    document.getElementById("scoreBoard").innerText = "Score: " + score;
+                    const result = calculateResult(firstOperand, theInput, theOperator);
+                    theCalculation.shownValue = String(result)
+                    theCalculation.firstOperand = result;
+                    if (theCalculation.theOperator == '=') {
+                        if (showIt.innerText[showIt.innerText.length - 1] != '=') {
+                            showIt.innerText += String(theCalculation.theOperator)
+                            showIt.innerText = result;
+                            if (numbers.includes(result) && !foundS.includes(result)) {
+                                foundS.push(result);
+                                reSetNumbers();
+                            }
+                        }
+                    } else {
+                        showIt.innerText += String(theCalculation.theOperator)
+                    }
+                }
+                theCalculation.waitedOperand = true;
+            }
+        }
+        function calculateResult(firstOperand, waitedOperand, operator) {
+            let result;
+            isOpCalled = true;
+            switch (operator) {
+                case '+':
+                    result = firstOperand + waitedOperand;
+                    break;
+                case '-':
+                    result = firstOperand - waitedOperand;
+                    break;
+                case '*':
+                    result = firstOperand * waitedOperand;
+                    break;
+                case '/':
+                    result = firstOperand / waitedOperand;
+                    break;
+                default:
+                    result = waitedOperand;
+                    break;
+            }
+            return parseFloat(result.toFixed(2));
+        }
+
+        function resetCalculation() {
+            isOpCalled = false;
+            theCalculation.shownValue = '0';
+            theCalculation.firstOperand = null;
+            theCalculation.waitedOperand = false;
+            theCalculation.theOperator = null;
+            document.getElementById("show").innerHTML = "";
+        }
+        setNumbers();
+        // https://freshman.tech/calculator/
+    </script>
+</body>
+
+</html>
